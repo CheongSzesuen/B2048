@@ -1,5 +1,5 @@
 # B2048-更好的2048
-![headImg](https://cdn.jsdelivr.net/gh/CheongSzesuen/B2048_AstroBox_Release@refs/heads/main/head/head.png)
+![headImg](https://raw.githubusercontent.com/CheongSzesuen/B2048_AstroBox_Release/refs/heads/main/head/head.png)
 更好的2048，环10移植版本，1.1版本已经做到和其他手环版本效果一样了。
 
 [环10适配米坛链接](https://www.bandbbs.cn/resources/3833/)，自定义工具分享链接。
@@ -54,7 +54,7 @@ lst没有开源设计，只有背景图。所以在适配的时候我用即时�
 - [ ] 重置二次确认，可以开关。
 - [ ] 自定义字体大小
 - [ ] 使用两个模式计分，自己选择
-- [ ] 改用file保存
+- [x] 改用file保存
 
 ## 许可证
 GPL-3.0

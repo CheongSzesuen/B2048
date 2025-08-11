@@ -1,89 +1,102 @@
 <template>
-    <div class="container" @swipe="move">
-      <!--背景+按钮-->
-      <div class="bg" if="{{dark}}">
-        <img src="/common/bg2.png" class="bg-img" />
-        <img class="btn-reset" src="/common/reset_b.png" @click="new_game" />
-        <img class="btn-undo" src="/common/undo_b.png" @click="chcb" />
-        <img class="btn-info" src="/common/info_b.png" @click="openMenu()" />
-      </div>
-      <div class="bg" else>
-        <img src="/common/bg1.png" class="bg-img" />
-        <img class="btn-reset" src="/common/reset.png" @click="new_game" />
-        <img class="btn-undo" src="/common/undo.png" @click="chcb" />
-        <img class="btn-info" src="/common/info.png" @click="openMenu()" />
-      </div>
-  
-      <!--游戏区域-->
-      <div class="game-board">
-        <block for="blocks">
-          <text
-            class="square"
-            style="background-color: {{ bgc[md[$item]] }};"
-            if="{{ !dark }}"
-            id="{{ $item }}"
-          >
-            {{ md[$item] }}
-          </text>
-          <text
-            class="square"
-            style="color: {{ bgc[md[$item]] }};background-color: {{ ise[$item] }}"
-            else
-            id="{{ $item }}"
-          >
-            {{ md[$item] }}
-          </text>
-        </block>
-      </div>
-  
-      <!--分数显示-->
-      <text class="score">最高 {{ hsc }}</text>
-      <text class="current-score">当前 {{ sco }}</text>
-  
-      <!--关于菜单-->
-      <div class="menu-overlay" if="{{ menuFlag }}">
-        <scroll class="menu-content" scroll-y="true" bounces="true" id="about">
-          <img src="/common/about.png" />
-          <!-- 亮色/暗色切换按钮 -->
-          <img 
-            src="/common/true.png" 
-            if="{{ dark }}" 
-            class="mode-btn" 
-            @click="changeMode" 
-          />
-          <img 
-            src="/common/false.png" 
-            else 
-            class="mode-btn" 
-            @click="changeMode" 
-          />
-          <!-- 动画开关按钮 -->
-          <img 
-            src="/common/true.png" 
-            if="{{ ani }}" 
-            class="ani-btn" 
-            @click="changeAni" 
-          />
-          <img 
-            src="/common/false.png" 
-            else 
-            class="ani-btn" 
-            @click="changeAni" 
-          />
-        </scroll>
-      </div>
-  
-      <!--返回按钮-->
-      <img
-        class="btn-back"
-        src="{{ dark||menuFlag ? '/common/back_b.png' : '/common/back.png' }}"
-        @click="exit('e')"
-      />
+  <div class="container" @swipe="move">
+    <!--背景+按钮-->
+    <div class="bg" if="{{dark}}">
+      <img src="/common/bg2.png" class="bg-img" />
+      <img class="btn-reset" src="/common/reset_b.png" @click="new_game" />
+      <img class="btn-undo" src="/common/undo_b.png" @click="chcb" />
+      <img class="btn-info" src="/common/info_b.png" @click="openMenu()" />
     </div>
-  </template>
-  
-  <script>
-  import prompt from "@system.prompt"
+    <div class="bg" else>
+      <img src="/common/bg1.png" class="bg-img" />
+      <img class="btn-reset" src="/common/reset.png" @click="new_game" />
+      <img class="btn-undo" src="/common/undo.png" @click="chcb" />
+      <img class="btn-info" src="/common/info.png" @click="openMenu()" />
+    </div>
+
+    <!--游戏区域-->
+    <div class="game-board">
+      <block for="blocks">
+        <text
+          class="square"
+          style="background-color: {{ bgc[md[$item]] }};"
+          if="{{ !dark }}"
+          id="{{ $item }}"
+        >
+          {{ md[$item] }}
+        </text>
+        <text
+          class="square"
+          style="color: {{ bgc[md[$item]] }};background-color: {{ ise[$item] }}"
+          else
+          id="{{ $item }}"
+        >
+          {{ md[$item] }}
+        </text>
+      </block>
+    </div>
+
+    <!--分数显示-->
+    <text class="score">最高 {{ scoreMode ? hsc : maxTileHistory }}</text>
+    <text class="current-score">当前 {{ scoreMode ? sco : maxTile }}</text>
+
+    <!--关于菜单-->
+    <div class="menu-overlay" if="{{ menuFlag }}">
+      <scroll class="menu-content" scroll-y="true" bounces="true" id="about">
+        <img src="/common/about.png" />
+        <!-- 亮色/暗色切换按钮 -->
+        <img 
+          src="/common/true.png" 
+          if="{{ dark }}" 
+          class="mode-btn" 
+          @click="changeMode" 
+        />
+        <img 
+          src="/common/false.png" 
+          else 
+          class="mode-btn" 
+          @click="changeMode" 
+        />
+        <!-- 动画开关按钮 -->
+        <img 
+          src="/common/true.png" 
+          if="{{ ani }}" 
+          class="ani-btn" 
+          @click="changeAni" 
+        />
+        <img 
+          src="/common/false.png" 
+          else 
+          class="ani-btn" 
+          @click="changeAni" 
+        />
+        <!-- 计分模式切换按钮 -->
+        <img 
+          src="/common/true.png" 
+          if="{{ scoreMode }}" 
+          class="score-mode-btn" 
+          @click="changeScoreMode" 
+        />
+        <img 
+          src="/common/false.png" 
+          else 
+          class="score-mode-btn" 
+          @click="changeScoreMode" 
+        />
+      </scroll>
+    </div>
+
+    <!--返回按钮-->
+    <img
+      class="btn-back"
+      src="{{ dark||menuFlag ? '/common/back_b.png' : '/common/back.png' }}"
+      @click="exit('e')"
+    />
+  </div>
+</template>
+
+<script>
+import prompt from "@system.prompt"
 import folme from '@system.folme'
 import file from '@system.file'
 
@@ -94,7 +107,9 @@ var sc = 0,
     added = Array(4),
     over = 0,
     lm = Array(4),
-    that
+    that,
+    maxTile = 0,
+    maxTileHistory = 0
 
 // 初始化数组
 for (let i = 0; i < 4; i++) {
@@ -112,12 +127,15 @@ export default {
         md: [],
         hsc: 0,
         sco: sc,
+        maxTile: 0,
+        maxTileHistory: 0,
         bgc: [],
         ise: [],
         ch: 0,
         dark: false,
         menuFlag: false,
-        ani: true
+        ani: true,
+        scoreMode: true
     },
 
     onInit() {
@@ -148,6 +166,9 @@ export default {
                             this.ch = o.ch || 0
                             this.dark = o.dark
                             this.ani = o.ani
+                            this.scoreMode = o.scoreMode !== undefined ? o.scoreMode : true
+                            this.maxTile = o.maxTile || 0
+                            this.maxTileHistory = o.maxTileHistory || 0
                             rm0(board)
                         } else {
                             this.new_game()
@@ -174,6 +195,9 @@ export default {
                                     this.ch = o.ch || 0
                                     this.dark = o.dark
                                     this.ani = o.ani
+                                    this.scoreMode = o.scoreMode !== undefined ? o.scoreMode : true
+                                    this.maxTile = o.maxTile || 0
+                                    this.maxTileHistory = o.maxTileHistory || 0
                                     rm0(board)
                                 } else {
                                     this.new_game()
@@ -191,6 +215,11 @@ export default {
             }
         })
         clear(added)
+    },
+
+    changeScoreMode() {
+        this.scoreMode = !this.scoreMode
+        this.save()
     },
 
     chcb() {
@@ -221,6 +250,7 @@ export default {
         backup()
         newgame()
         this.sco = 0
+        this.maxTile = 0
         this.save()
     },
 
@@ -243,7 +273,23 @@ export default {
             if (this.sco > this.hsc) {
                 this.hsc = this.sco
             }
+            this.updateMaxTile()
             this.save()
+        }
+    },
+
+    updateMaxTile() {
+        let currentMax = 0
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+                if (board[i][j] > currentMax) {
+                    currentMax = board[i][j]
+                }
+            }
+        }
+        this.maxTile = currentMax
+        if (currentMax > this.maxTileHistory) {
+            this.maxTileHistory = currentMax
         }
     },
 
@@ -257,7 +303,10 @@ export default {
             ch: this.ch,
             lm: lm,
             ls: ls,
-            lhs: lhs
+            lhs: lhs,
+            scoreMode: this.scoreMode,
+            maxTile: this.maxTile,
+            maxTileHistory: this.maxTileHistory
         }
         
         file.writeText({
@@ -324,6 +373,7 @@ function rm0(sm) {
             a++
         }
     }
+    that.updateMaxTile()
 }
 
 function clear(m) {
@@ -690,129 +740,137 @@ function noBlockVertical(a, b, c, d) {
     }
     return true
 }
-  </script>
-  
-  <style>
-  .container {
-    position: relative;
-    width: 192px;
-    height: 490px;
-  }
-  
-  .bg {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-  }
-  
-  .bg-img {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .btn-reset {
-    position: absolute;
-    left: 5px;
-    top: 387px;
-    width: 92px;
-    height: 64px;
-  }
-  
-  .btn-undo {
-    position: absolute;
-    left: 115px;
-    top: 387px;
-    width: 92px;
-    height: 64px;
-  }
-  
-  .btn-info {
-    position: absolute;
-    left: 65px;
-    top: 451px;
-    width: 83px;
-    height: 62px;
-  }
-  
-  .btn-back {
-    position: absolute;
-    left: 55px;
-    top: 7px;
-    width: 102px;
-    height: 72px;
-  }
-  
-  .game-board {
+</script>
+
+<style>
+.container {
+  position: relative;
+  width: 192px;
+  height: 490px;
+}
+
+.bg {
   position: absolute;
-  left: 4px;
+  width: 100%;
+  height: 100%;
+}
+
+.bg-img {
+  width: 100%;
+  height: 100%;
+}
+
+.btn-reset {
+  position: absolute;
+  left: 5px;
+  top: 387px;
+  width: 92px;
+  height: 64px;
+}
+
+.btn-undo {
+  position: absolute;
+  left: 115px;
+  top: 387px;
+  width: 92px;
+  height: 64px;
+}
+
+.btn-info {
+  position: absolute;
+  left: 65px;
+  top: 451px;
+  width: 83px;
+  height: 62px;
+}
+
+.btn-back {
+  position: absolute;
+  left: 55px;
+  top: 7px;
+  width: 102px;
+  height: 72px;
+}
+
+.game-board {
+position: absolute;
+left: 4px;
 top: 170px;
 width: 206px;
 height: 206px;
-  padding-top: 4px;
-  padding-left: 4px;
-  display: flex;
-  flex-wrap: wrap;
+padding-top: 4px;
+padding-left: 4px;
+display: flex;
+flex-wrap: wrap;
 }
 
 .square {
-  width: 44px;
-  height: 44px;
-  margin-top: 5px;
-  margin-left: 4px;
-  border-radius: 13px;
-  font-size: 15px;
-  color: #59503f;
-  font-weight: bold;
-  text-align: center;
-  position: relative;
+width: 44px;
+height: 44px;
+margin-top: 5px;
+margin-left: 4px;
+border-radius: 13px;
+font-size: 15px;
+color: #59503f;
+font-weight: bold;
+text-align: center;
+position: relative;
 }
-  
-  .score {
-    position: absolute;
-    left: 0;
-    top: 84px;
-    width: 100%;
-    font-size: 28px;
-    color: rgba(255, 255, 255, 0.6);
-    text-align: center;
-  }
-  
-  .current-score {
-    position: absolute;
-    left: 0;
-    top: 122px;
-    width: 100%;
-    font-size: 28px;
-    color: rgba(255, 255, 255, 0.6);
-    text-align: center;
-  }
-  
-  .menu-overlay {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0);
-  }
-  
-  .menu-content {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-  }
-  
-  .mode-btn {
-    position: absolute;
-    left: 56px;
-    top: 636px;
-    width: 102px;
-    height: 72px;
-  }
-  
-  .ani-btn {
-    position: absolute;
-    left: 55px;
-    top: 768px;
-    width: 102px;
-    height: 72px;
-  }
-  </style>
+
+.score {
+  position: absolute;
+  left: 0;
+  top: 84px;
+  width: 100%;
+  font-size: 28px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+.current-score {
+  position: absolute;
+  left: 0;
+  top: 122px;
+  width: 100%;
+  font-size: 28px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+.menu-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.menu-content {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.mode-btn {
+  position: absolute;
+  left: 56px;
+  top: 636px;
+  width: 102px;
+  height: 72px;
+}
+
+.ani-btn {
+  position: absolute;
+  left: 55px;
+  top: 768px;
+  width: 102px;
+  height: 72px;
+}
+
+.score-mode-btn {
+  position: absolute;
+  left: 55px;
+  top: 951px;
+  width: 102px;
+  height: 72px;
+}
+</style>
