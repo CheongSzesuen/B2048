@@ -101,8 +101,8 @@ import folme from '@system.folme'
 import file from '@system.file'
 
 var sc = 0,
-    ls,
-    lhs,
+    ls = 0,
+    lhs = 0,
     board = Array(4),
     added = Array(4),
     over = 0,
@@ -113,9 +113,9 @@ var sc = 0,
 
 // 初始化数组
 for (let i = 0; i < 4; i++) {
-    lm[i] = new Array(4)
-    board[i] = new Array(4)
-    added[i] = new Array(4)
+    lm[i] = new Array(4).fill(0)
+    board[i] = new Array(4).fill(0)
+    added[i] = new Array(4).fill(0)
 }
 
 // 定义文件路径
@@ -160,15 +160,18 @@ export default {
                     success: (res) => {
                         if (res.text) {
                             let o = JSON.parse(res.text)
-                            board = o.map
-                            this.hsc = o.hs
-                            this.sco = o.sc
+                            board = o.map || board
+                            this.hsc = o.hs || 0
+                            this.sco = o.sc || 0
                             this.ch = o.ch || 0
-                            this.dark = o.dark
-                            this.ani = o.ani
+                            this.dark = o.dark || false
+                            this.ani = o.ani !== undefined ? o.ani : true
                             this.scoreMode = o.scoreMode !== undefined ? o.scoreMode : true
                             this.maxTile = o.maxTile || 0
                             this.maxTileHistory = o.maxTileHistory || 0
+                            lm = o.lm || lm
+                            ls = o.ls || 0
+                            lhs = o.lhs || 0
                             rm0(board)
                         } else {
                             this.new_game()
@@ -189,15 +192,18 @@ export default {
                             success: (res) => {
                                 if (res.text) {
                                     let o = JSON.parse(res.text)
-                                    board = o.map
-                                    this.hsc = o.hs
-                                    this.sco = o.sc
+                                    board = o.map || board
+                                    this.hsc = o.hs || 0
+                                    this.sco = o.sc || 0
                                     this.ch = o.ch || 0
-                                    this.dark = o.dark
-                                    this.ani = o.ani
+                                    this.dark = o.dark || false
+                                    this.ani = o.ani !== undefined ? o.ani : true
                                     this.scoreMode = o.scoreMode !== undefined ? o.scoreMode : true
                                     this.maxTile = o.maxTile || 0
                                     this.maxTileHistory = o.maxTileHistory || 0
+                                    lm = o.lm || lm
+                                    ls = o.ls || 0
+                                    lhs = o.lhs || 0
                                     rm0(board)
                                 } else {
                                     this.new_game()
@@ -223,19 +229,20 @@ export default {
     },
 
     chcb() {
-        if (this.ch == 1) {
-            this.hsc = lhs
-            this.sco = ls
+        if (this.ch == 1 && lm && lm[0]) {
+            this.hsc = lhs || 0
+            this.sco = ls || 0
 
             // 恢复游戏状态
             for (let i = 0; i < 4; i++) {
                 for (let j = 0; j < 4; j++) {
-                    board[i][j] = lm[i][j]
+                    board[i][j] = lm[i][j] || 0
                 }
             }
 
             rm0(board)
             over = 0
+            this.updateMaxTile()
             this.save()
             this.ch = 0
         } else {
@@ -248,9 +255,26 @@ export default {
 
     new_game() {
         backup()
-        newgame()
+        over = 0
+        clear(board)
+        
+        // 生成两个初始方块（确保位置不同）
+        let pos1 = Math.floor(Math.random() * 16)
+        let pos2
+        do {
+            pos2 = Math.floor(Math.random() * 16)
+        } while (pos2 === pos1)
+        
+        let val1 = Math.random() > 0.5 ? 2 : 4
+        let val2 = Math.random() > 0.5 ? 2 : 4
+        
+        board[Math.floor(pos1 / 4)][pos1 % 4] = val1
+        board[Math.floor(pos2 / 4)][pos2 % 4] = val2
+        
         this.sco = 0
-        this.maxTile = 0
+        this.maxTile = Math.max(val1, val2)
+        this.hsc = Math.max(this.hsc || 0, this.sco)
+        rm0(board)
         this.save()
     },
 
@@ -263,18 +287,28 @@ export default {
         const direction = eve.direction.toLowerCase()
         if (["up", "down", "left", "right"].includes(direction)) {
             backup()
-            mo(direction)
-            if (over) {
-                prompt.showToast({
-                    message: "Gameover!",
-                    duration: 2000
-                })
+            let oldMaxTile = this.maxTile // 保存移动前的最大方块值
+            let moved = mo(direction)
+            
+            if (moved) {
+                // 如果移动后最大方块值变小了，恢复原来的值
+                if (this.maxTile < oldMaxTile) {
+                    this.maxTile = oldMaxTile
+                }
+                
+                if (over) {
+                    prompt.showToast({
+                        message: "Gameover!",
+                        duration: 2000
+                    })
+                }
+                
+                if (this.sco > this.hsc) {
+                    this.hsc = this.sco
+                }
+                this.updateMaxTile()
+                this.save()
             }
-            if (this.sco > this.hsc) {
-                this.hsc = this.sco
-            }
-            this.updateMaxTile()
-            this.save()
         }
     },
 
@@ -287,7 +321,7 @@ export default {
                 }
             }
         }
-        this.maxTile = currentMax
+        this.maxTile = currentMax || 2
         if (currentMax > this.maxTileHistory) {
             this.maxTileHistory = currentMax
         }
@@ -296,17 +330,17 @@ export default {
     save() {
         let o = {
             map: board,
-            hs: this.hsc,
-            sc: this.sco,
+            hs: this.hsc || 0,
+            sc: this.sco || 0,
             dark: this.dark,
             ani: this.ani,
             ch: this.ch,
-            lm: lm,
-            ls: ls,
-            lhs: lhs,
+            lm: lm || board,
+            ls: ls || this.sco,
+            lhs: lhs || this.hsc,
             scoreMode: this.scoreMode,
-            maxTile: this.maxTile,
-            maxTileHistory: this.maxTileHistory
+            maxTile: this.maxTile || 2,
+            maxTileHistory: this.maxTileHistory || 0
         }
         
         file.writeText({
@@ -349,13 +383,20 @@ export default {
 
 // 辅助函数
 function backup() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            lm[i][j] = board[i][j]
+    if (!lm || !lm[0]) {
+        lm = Array(4)
+        for (let i = 0; i < 4; i++) {
+            lm[i] = new Array(4).fill(0)
         }
     }
-    ls = that.sco
-    lhs = that.hsc
+    
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            lm[i][j] = board[i][j] || 0
+        }
+    }
+    ls = that.sco || 0
+    lhs = that.hsc || 0
     that.ch = 1
 }
 
@@ -382,31 +423,20 @@ function clear(m) {
     }
 }
 
-function newgame() {
-    over = 0
-    clear(board)
-    newblock()
-    newblock()
-    rm0(board)
-}
-
-function rand_num() {
-    return Math.floor(Math.random() * 1000)
-}
-
 function newblock() {
-    for (
-        var a = 3, b = rand_num() % 4, c = rand_num() % 4, d = 50 < rand_num() % 100 ? 4 : 2;
-        0 < a;
-
-    ) {
+    let newValue = Math.random() > 0.5 ? 4 : 2
+    
+    for (var a = 3, b = Math.floor(Math.random() * 4), c = Math.floor(Math.random() * 4); a > 0; a--) {
         if (!board[b][c] || board[b][c] === 0) {
-            board[b][c] = d
+            board[b][c] = newValue
+            // 更新最大方块值
+            if (newValue > that.maxTile) {
+                that.maxTile = newValue
+            }
             return
         }
-        b = rand_num() % 4
-        c = rand_num() % 4
-        a--
+        b = Math.floor(Math.random() * 4)
+        c = Math.floor(Math.random() * 4)
     }
     checkGameOver()
 }
@@ -453,36 +483,6 @@ function mo(dir) {
     }
 
     return moved
-}
-
-function checkGameOver() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            if (!board[i][j] || board[i][j] === 0) {
-                over = 0
-                return
-            }
-        }
-    }
-
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            const current = board[i][j]
-            if (!current) continue
-
-            if (j < 3 && board[i][j + 1] && board[i][j + 1] === current) {
-                over = 0
-                return
-            }
-
-            if (i < 3 && board[i + 1][j] && board[i + 1][j] === current) {
-                over = 0
-                return
-            }
-        }
-    }
-
-    over = 1
 }
 
 function moveleft() {
@@ -665,6 +665,36 @@ function clearani() {
             toState: {translateX: "0px", translateY: "0px"}
         })
     }
+}
+
+function checkGameOver() {
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            if (!board[i][j] || board[i][j] === 0) {
+                over = 0
+                return
+            }
+        }
+    }
+
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            const current = board[i][j]
+            if (!current) continue
+
+            if (j < 3 && board[i][j + 1] && board[i][j + 1] === current) {
+                over = 0
+                return
+            }
+
+            if (i < 3 && board[i + 1][j] && board[i + 1][j] === current) {
+                over = 0
+                return
+            }
+        }
+    }
+
+    over = 1
 }
 
 function canMoveLeft(a) {
