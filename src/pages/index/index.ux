@@ -1,906 +1,906 @@
 <template>
-  <div class="container" @swipe="move">
-    <!--背景+按钮-->
-    <div class="bg" if="{{dark}}">
-      <img src="/common/bg2.png" class="bg-img" />
-      <img class="btn-reset" src="/common/reset_b.png" @click="new_game" />
-      <img class="btn-undo" src="/common/undo_b.png" @click="chcb" />
-      <img class="btn-info" src="/common/info_b.png" @click="openMenu()" />
+    <div class="container" @swipe="move">
+      <!--背景+按钮-->
+      <div class="bg" if="{{dark}}">
+        <img src="/common/bg2.png" class="bg-img" />
+        <img class="btn-reset" src="/common/reset_b.png" @click="new_game" />
+        <img class="btn-undo" src="/common/undo_b.png" @click="chcb" />
+        <img class="btn-info" src="/common/info_b.png" @click="openMenu()" />
+      </div>
+      <div class="bg" else>
+        <img src="/common/bg1.png" class="bg-img" />
+        <img class="btn-reset" src="/common/reset.png" @click="new_game" />
+        <img class="btn-undo" src="/common/undo.png" @click="chcb" />
+        <img class="btn-info" src="/common/info.png" @click="openMenu()" />
+      </div>
+  
+      <!--游戏区域-->
+      <div class="game-board">
+        <block for="blocks">
+          <text
+            class="square"
+            style="background-color: {{ bgc[md[$item]] }};"
+            if="{{ !dark }}"
+            id="{{ $item }}"
+          >
+            {{ md[$item] }}
+          </text>
+          <text
+            class="square"
+            style="color: {{ bgc[md[$item]] }};background-color: {{ ise[$item] }}"
+            else
+            id="{{ $item }}"
+          >
+            {{ md[$item] }}
+          </text>
+        </block>
+      </div>
+  
+      <!--分数显示-->
+      <text class="score">最高 {{ scoreMode ? hsc : maxTileHistory }}</text>
+      <text class="current-score">当前 {{ scoreMode ? sco : maxTile }}</text>
+  
+      <!--关于菜单-->
+      <div class="menu-overlay" if="{{ menuFlag }}">
+        <scroll class="menu-content" scroll-y="true" bounces="true" id="about">
+          <img src="/common/about.png" />
+          <!-- 亮色/暗色切换按钮 -->
+          <img 
+            src="/common/true.png" 
+            if="{{ dark }}" 
+            class="mode-btn" 
+            @click="changeMode" 
+          />
+          <img 
+            src="/common/false.png" 
+            else 
+            class="mode-btn" 
+            @click="changeMode" 
+          />
+          <!-- 动画开关按钮 -->
+          <img 
+            src="/common/true.png" 
+            if="{{ ani }}" 
+            class="ani-btn" 
+            @click="changeAni" 
+          />
+          <img 
+            src="/common/false.png" 
+            else 
+            class="ani-btn" 
+            @click="changeAni" 
+          />
+          <!-- 计分模式切换按钮 -->
+          <img 
+            src="/common/true.png" 
+            if="{{ scoreMode }}" 
+            class="score-mode-btn" 
+            @click="changeScoreMode" 
+          />
+          <img 
+            src="/common/false.png" 
+            else 
+            class="score-mode-btn" 
+            @click="changeScoreMode" 
+          />
+        </scroll>
+      </div>
+  
+      <!--返回按钮-->
+      <img
+        class="btn-back"
+        src="{{ dark||menuFlag ? '/common/back_b.png' : '/common/back.png' }}"
+        @click="exit('e')"
+      />
     </div>
-    <div class="bg" else>
-      <img src="/common/bg1.png" class="bg-img" />
-      <img class="btn-reset" src="/common/reset.png" @click="new_game" />
-      <img class="btn-undo" src="/common/undo.png" @click="chcb" />
-      <img class="btn-info" src="/common/info.png" @click="openMenu()" />
-    </div>
-
-    <!--游戏区域-->
-    <div class="game-board">
-      <block for="blocks">
-        <text
-          class="square"
-          style="background-color: {{ bgc[md[$item]] }};"
-          if="{{ !dark }}"
-          id="{{ $item }}"
-        >
-          {{ md[$item] }}
-        </text>
-        <text
-          class="square"
-          style="color: {{ bgc[md[$item]] }};background-color: {{ ise[$item] }}"
-          else
-          id="{{ $item }}"
-        >
-          {{ md[$item] }}
-        </text>
-      </block>
-    </div>
-
-    <!--分数显示-->
-    <text class="score">最高 {{ scoreMode ? hsc : maxTileHistory }}</text>
-    <text class="current-score">当前 {{ scoreMode ? sco : maxTile }}</text>
-
-    <!--关于菜单-->
-    <div class="menu-overlay" if="{{ menuFlag }}">
-      <scroll class="menu-content" scroll-y="true" bounces="true" id="about">
-        <img src="/common/about.png" />
-        <!-- 亮色/暗色切换按钮 -->
-        <img 
-          src="/common/true.png" 
-          if="{{ dark }}" 
-          class="mode-btn" 
-          @click="changeMode" 
-        />
-        <img 
-          src="/common/false.png" 
-          else 
-          class="mode-btn" 
-          @click="changeMode" 
-        />
-        <!-- 动画开关按钮 -->
-        <img 
-          src="/common/true.png" 
-          if="{{ ani }}" 
-          class="ani-btn" 
-          @click="changeAni" 
-        />
-        <img 
-          src="/common/false.png" 
-          else 
-          class="ani-btn" 
-          @click="changeAni" 
-        />
-        <!-- 计分模式切换按钮 -->
-        <img 
-          src="/common/true.png" 
-          if="{{ scoreMode }}" 
-          class="score-mode-btn" 
-          @click="changeScoreMode" 
-        />
-        <img 
-          src="/common/false.png" 
-          else 
-          class="score-mode-btn" 
-          @click="changeScoreMode" 
-        />
-      </scroll>
-    </div>
-
-    <!--返回按钮-->
-    <img
-      class="btn-back"
-      src="{{ dark||menuFlag ? '/common/back_b.png' : '/common/back.png' }}"
-      @click="exit('e')"
-    />
-  </div>
-</template>
-
-<script>
-import prompt from "@system.prompt"
-import folme from '@system.folme'
-import file from '@system.file'
-
-var sc = 0,
-    ls = 0,
-    lhs = 0,
-    board = Array(4),
-    added = Array(4),
-    over = 0,
-    lm = Array(4),
-    that,
-    maxTile = 0,
-    maxTileHistory = 0
-
-// 初始化数组
-for (let i = 0; i < 4; i++) {
-    lm[i] = new Array(4).fill(0)
-    board[i] = new Array(4).fill(0)
-    added[i] = new Array(4).fill(0)
-}
-
-// 定义文件路径
-const GAME_DATA_FILE = 'internal://files/2048/game_data.json'
-
-export default {
-    public: {
-        blocks: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"],
-        md: [],
-        hsc: 0,
-        sco: sc,
-        maxTile: 0,
-        maxTileHistory: 0,
-        bgc: [],
-        ise: [],
-        ch: 0,
-        dark: false,
-        menuFlag: false,
-        ani: true,
-        scoreMode: true
-    },
-
-    onInit() {
-        that = this
-        // 初始化颜色
-        let tempc =
-            "rgba(0,0,0,0) #EFE5DA #F0E0C9 #fcb477 #ff9c61 #ff865d #ff6a38 #ebcf71 #ebcc5f #ebc94f #ebc53f #ebc22c #F2B6B6 #E8ED51 #FFE3FB #E8FF8C #FFDEC9".split(
-                " "
-            )
-        tempc.forEach((a, index) => {
-            this.bgc[2 ** index] = a
-        })
-        this.bgc[""] = "rgba(0, 0, 0, 0)"
-
-        // 检查并创建目录
-        file.access({
-            uri: 'internal://files/2048',
-            success: () => {
-                // 目录存在，加载游戏数据
-                file.readText({
-                    uri: GAME_DATA_FILE,
-                    success: (res) => {
-                        if (res.text) {
-                            let o = JSON.parse(res.text)
-                            board = o.map || board
-                            this.hsc = o.hs || 0
-                            this.sco = o.sc || 0
-                            this.ch = o.ch || 0
-                            this.dark = o.dark || false
-                            this.ani = o.ani !== undefined ? o.ani : true
-                            this.scoreMode = o.scoreMode !== undefined ? o.scoreMode : true
-                            this.maxTile = o.maxTile || 0
-                            this.maxTileHistory = o.maxTileHistory || 0
-                            lm = o.lm || lm
-                            ls = o.ls || 0
-                            lhs = o.lhs || 0
-                            rm0(board)
-                        } else {
-                            this.new_game()
-                        }
-                    },
-                    fail: () => {
-                        this.new_game()
-                    }
-                })
-            },
-            fail: () => {
-                // 目录不存在，创建目录
-                file.mkdir({
-                    uri: 'internal://files/2048',
-                    success: () => {
-                        file.readText({
-                            uri: GAME_DATA_FILE,
-                            success: (res) => {
-                                if (res.text) {
-                                    let o = JSON.parse(res.text)
-                                    board = o.map || board
-                                    this.hsc = o.hs || 0
-                                    this.sco = o.sc || 0
-                                    this.ch = o.ch || 0
-                                    this.dark = o.dark || false
-                                    this.ani = o.ani !== undefined ? o.ani : true
-                                    this.scoreMode = o.scoreMode !== undefined ? o.scoreMode : true
-                                    this.maxTile = o.maxTile || 0
-                                    this.maxTileHistory = o.maxTileHistory || 0
-                                    lm = o.lm || lm
-                                    ls = o.ls || 0
-                                    lhs = o.lhs || 0
-                                    rm0(board)
-                                } else {
-                                    this.new_game()
-                                }
-                            },
-                            fail: () => {
-                                this.new_game()
-                            }
-                        })
-                    },
-                    fail: () => {
-                        this.new_game()
-                    }
-                })
-            }
-        })
-        clear(added)
-    },
-
-    changeScoreMode() {
-        this.scoreMode = !this.scoreMode
-        this.save()
-    },
-
-    chcb() {
-        if (this.ch == 1 && lm && lm[0]) {
-            this.hsc = lhs || 0
-            this.sco = ls || 0
-
-            // 恢复游戏状态
-            for (let i = 0; i < 4; i++) {
-                for (let j = 0; j < 4; j++) {
-                    board[i][j] = lm[i][j] || 0
-                }
-            }
-
-            rm0(board)
-            over = 0
-            this.updateMaxTile()
-            this.save()
-            this.ch = 0
-        } else {
-            prompt.showToast({
-                message: "不，不可以再撤啦",
-                duration: 500
-            })
-        }
-    },
-
-    new_game() {
-        backup()
-        over = 0
-        clear(board)
-        
-        // 生成两个初始方块（确保位置不同）
-        let pos1 = Math.floor(Math.random() * 16)
-        let pos2
-        do {
-            pos2 = Math.floor(Math.random() * 16)
-        } while (pos2 === pos1)
-        
-        let val1 = Math.random() > 0.5 ? 2 : 4
-        let val2 = Math.random() > 0.5 ? 2 : 4
-        
-        board[Math.floor(pos1 / 4)][pos1 % 4] = val1
-        board[Math.floor(pos2 / 4)][pos2 % 4] = val2
-        
-        this.sco = 0
-        this.maxTile = Math.max(val1, val2)
-        this.hsc = Math.max(this.hsc || 0, this.sco)
-        rm0(board)
-        this.save()
-    },
-
-    move(eve) {
-        if (this.menuFlag) {
-            if (eve.direction == "right") this.exit('e')
-            return
-        }
-
-        const direction = eve.direction.toLowerCase()
-        if (["up", "down", "left", "right"].includes(direction)) {
-            backup()
-            let oldMaxTile = this.maxTile // 保存移动前的最大方块值
-            let moved = mo(direction)
-            
-            if (moved) {
-                // 如果移动后最大方块值变小了，恢复原来的值
-                if (this.maxTile < oldMaxTile) {
-                    this.maxTile = oldMaxTile
-                }
-                
-                if (over) {
-                    prompt.showToast({
-                        message: "Gameover!",
-                        duration: 2000
-                    })
-                }
-                
-                if (this.sco > this.hsc) {
-                    this.hsc = this.sco
-                }
-                this.updateMaxTile()
-                this.save()
-            }
-        }
-    },
-
-    updateMaxTile() {
-        let currentMax = 0
-        for (let i = 0; i < 4; i++) {
-            for (let j = 0; j < 4; j++) {
-                if (board[i][j] > currentMax) {
-                    currentMax = board[i][j]
-                }
-            }
-        }
-        this.maxTile = currentMax || 2
-        if (currentMax > this.maxTileHistory) {
-            this.maxTileHistory = currentMax
-        }
-    },
-
-    save() {
-        let o = {
-            map: board,
-            hs: this.hsc || 0,
-            sc: this.sco || 0,
-            dark: this.dark,
-            ani: this.ani,
-            ch: this.ch,
-            lm: lm || board,
-            ls: ls || this.sco,
-            lhs: lhs || this.hsc,
-            scoreMode: this.scoreMode,
-            maxTile: this.maxTile || 2,
-            maxTileHistory: this.maxTileHistory || 0
-        }
-        
-        file.writeText({
-            uri: GAME_DATA_FILE,
-            text: JSON.stringify(o),
-            success: () => console.log('游戏数据保存成功'),
-            fail: (err, code) => console.log(`保存失败: ${code}`)
-        })
-    },
-
-    exit(a) {
-        if (a.direction == "right" || a == "e") {
-            if (this.menuFlag) {
-                this.menuFlag = false
-            } else {
-                this.$app.exit()
-            }
-        }
-    },
-
-    openMenu() {
-        this.menuFlag = true
-    },
-
-    changeMode() {
-        this.dark = !this.dark
-        this.save()
-    },
-
-    changeAni() {
-        this.ani = !this.ani
-        this.save()
-    },
-
-    onBackPress() {
-        this.exit('e')
-        return true
-    }
-}
-
-// 辅助函数
-function backup() {
-    if (!lm || !lm[0]) {
-        lm = Array(4)
-        for (let i = 0; i < 4; i++) {
-            lm[i] = new Array(4).fill(0)
-        }
-    }
-    
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            lm[i][j] = board[i][j] || 0
-        }
-    }
-    ls = that.sco || 0
-    lhs = that.hsc || 0
-    that.ch = 1
-}
-
-function rm0(sm) {
-    let a = 0
-    for (let i = 0; i < 4; i++) {
-        for (var b = 0; 4 > b; b++) {
-            if (!sm[i][b] || sm[i][b] === 0) {
-                that.md[a] = ""
-                that.ise[a] = "#00000000"
-            } else {
-                that.ise[a] = "#ffffff20"
-                that.md[a] = sm[i][b]
-            }
-            a++
-        }
-    }
-    that.updateMaxTile()
-}
-
-function clear(m) {
-    for (let i = 0; i < 4; i++) {
-        m[i].fill(0)
-    }
-}
-
-function newblock() {
-    let newValue = Math.random() > 0.5 ? 4 : 2
-    
-    for (var a = 3, b = Math.floor(Math.random() * 4), c = Math.floor(Math.random() * 4); a > 0; a--) {
-        if (!board[b][c] || board[b][c] === 0) {
-            board[b][c] = newValue
-            // 更新最大方块值
-            if (newValue > that.maxTile) {
-                that.maxTile = newValue
-            }
-            return
-        }
-        b = Math.floor(Math.random() * 4)
-        c = Math.floor(Math.random() * 4)
-    }
-    checkGameOver()
-}
-
-function mo(dir) {
-    if (!canMoveLeft(board) && !canMoveRight(board) && !canMoveUp(board) && !canMoveDown(board)) {
-        over = 1
-        rm0(board)
-        return false
-    }
-
-    let moved = false
-
-    switch (dir) {
-        case "left":
-            moved = moveleft()
-            break
-        case "right":
-            moved = moveright()
-            break
-        case "up":
-            moved = moveup()
-            break
-        case "down":
-            moved = movedown()
-            break
-    }
-
-    if (moved) {
-        clear(added)
-        if (that.ani) {
-            setTimeout(() => {
-                clearani()
-            }, 120)
-            setTimeout(() => {
-                newblock()
-                rm0(board)
-            }, 110)
-        } else {
-            newblock()
-            rm0(board)
-        }
-        checkGameOver()
-    }
-
-    return moved
-}
-
-function moveleft() {
-    let moved = false
-    for (let a = 0; a < 4; a++) {
-        for (let b = 1; b < 4; b++) {
-            const current = board[a][b]
-            if (current && current !== 0) {
-                for (let c = 0; c < b; c++) {
-                    const target = board[a][c]
-
-                    if ((!target || target === 0) && noBlockHorizontal(a, c, b, board)) {
-                        board[a][c] = current
-                        board[a][b] = 0
-                        if (that.ani) fromTo(a * 4 + b, a * 4 + c)
-                        moved = true
-                        break
-                    } else if (
-                        target &&
-                        target === current &&
-                        noBlockHorizontal(a, c, b, board) &&
-                        0 == added[a][c]
-                    ) {
-                        const newValue = target * 2
-                        board[a][c] = newValue
-                        that.sco += newValue
-                        board[a][b] = 0
-                        added[a][c] = 1
-                        if (that.ani) fromTo(a * 4 + b, a * 4 + c)
-                        moved = true
-                        break
-                    }
-                }
-            }
-        }
-    }
-    return moved
-}
-
-function moveright() {
-    let moved = false
-    for (let a = 0; a < 4; a++) {
-        for (let b = 2; b >= 0; b--) {
-            const current = board[a][b]
-            if (current && current !== 0) {
-                for (let c = 3; c > b; c--) {
-                    const target = board[a][c]
-
-                    if ((!target || target === 0) && noBlockHorizontal(a, b, c, board)) {
-                        board[a][c] = current
-                        board[a][b] = 0
-                        if (that.ani) fromTo(a * 4 + b, a * 4 + c)
-                        moved = true
-                        break
-                    } else if (
-                        target &&
-                        target === current &&
-                        noBlockHorizontal(a, b, c, board) &&
-                        0 == added[a][c]
-                    ) {
-                        const newValue = target * 2
-                        board[a][c] = newValue
-                        that.sco += newValue
-                        board[a][b] = 0
-                        added[a][c] = 1
-                        if (that.ani) fromTo(a * 4 + b, a * 4 + c)
-                        moved = true
-                        break
-                    }
-                }
-            }
-        }
-    }
-    return moved
-}
-
-function moveup() {
-    let moved = false
-    for (let a = 0; a < 4; a++) {
-        for (let b = 1; b < 4; b++) {
-            const current = board[b][a]
-            if (current && current !== 0) {
-                for (let c = 0; c < b; c++) {
-                    const target = board[c][a]
-
-                    if ((!target || target === 0) && noBlockVertical(a, c, b, board)) {
-                        board[c][a] = current
-                        board[b][a] = 0
-                        if (that.ani) fromTo(b * 4 + a, c * 4 + a)
-                        moved = true
-                        break
-                    } else if (
-                        target &&
-                        target === current &&
-                        noBlockVertical(a, c, b, board) &&
-                        0 == added[c][a]
-                    ) {
-                        const newValue = target * 2
-                        board[c][a] = newValue
-                        that.sco += newValue
-                        board[b][a] = 0
-                        added[c][a] = 1
-                        if (that.ani) fromTo(b * 4 + a, c * 4 + a)
-                        moved = true
-                        break
-                    }
-                }
-            }
-        }
-    }
-    return moved
-}
-
-function movedown() {
-    let moved = false
-    for (let a = 0; a < 4; a++) {
-        for (let b = 2; b >= 0; b--) {
-            const current = board[b][a]
-            if (current && current !== 0) {
-                for (let c = 3; c > b; c--) {
-                    const target = board[c][a]
-
-                    if ((!target || target === 0) && noBlockVertical(a, b, c, board)) {
-                        board[c][a] = current
-                        board[b][a] = 0
-                        if (that.ani) fromTo(b * 4 + a, c * 4 + a)
-                        moved = true
-                        break
-                    } else if (
-                        target &&
-                        target === current &&
-                        noBlockVertical(a, b, c, board) &&
-                        0 == added[c][a]
-                    ) {
-                        const newValue = target * 2
-                        board[c][a] = newValue
-                        that.sco += newValue
-                        board[b][a] = 0
-                        added[c][a] = 1
-                        if (that.ani) fromTo(b * 4 + a, c * 4 + a)
-                        moved = true
-                        break
-                    }
-                }
-            }
-        }
-    }
-    return moved
-}
-
-function fromTo(id1, id2) {
-    id1 = id1.toString()
-    id2 = id2.toString()
-    
-    that.$element(id1).getBoundingClientRect({
-        success: (data1) => {
-            that.$element(id2).getBoundingClientRect({
-                success: (data2) => {
-                    const dx = data2.left - data1.left
-                    const dy = data2.top - data1.top
-                    
-                    folme.fromTo({
-                        id: id1,
-                        fromState: {translateX: "0px", translateY: "0px"},
-                        toState: {translateX: dx + "px", translateY: dy + "px"},
-                        config: {duration: 0.1}
-                    })
-                }
-            })
-        }
-    })
-}
-
-function clearani() {
-    for (let i = 0; i < 16; i++) {
-        let id = i.toString()
-        folme.cancel({id: id})
-        folme.setTo({
-            id: id,
-            toState: {translateX: "0px", translateY: "0px"}
-        })
-    }
-}
-
-function checkGameOver() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            if (!board[i][j] || board[i][j] === 0) {
-                over = 0
-                return
-            }
-        }
-    }
-
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            const current = board[i][j]
-            if (!current) continue
-
-            if (j < 3 && board[i][j + 1] && board[i][j + 1] === current) {
-                over = 0
-                return
-            }
-
-            if (i < 3 && board[i + 1][j] && board[i + 1][j] === current) {
-                over = 0
-                return
-            }
-        }
-    }
-
-    over = 1
-}
-
-function canMoveLeft(a) {
-    for (let b = 0; b < 4; b++) {
-        for (let c = 0; c < 4; c++) {
-            const cell = a[b][c]
-            if (cell && cell !== 0 && c != 0) {
-                const left = a[b][c - 1]
-                if (!left || left === 0 || left === cell) {
-                    return true
-                }
-            }
-        }
-    }
-    return false
-}
-
-function canMoveRight(a) {
-    for (let b = 0; b < 4; b++) {
-        for (let c = 0; c < 4; c++) {
-            const cell = a[b][c]
-            if (cell && cell !== 0 && c != 3) {
-                const right = a[b][c + 1]
-                if (!right || right === 0 || right === cell) {
-                    return true
-                }
-            }
-        }
-    }
-    return false
-}
-
-function canMoveUp(a) {
-    for (let b = 0; b < 4; b++) {
-        for (let c = 0; c < 4; c++) {
-            const cell = a[b][c]
-            if (cell && cell !== 0 && b != 0) {
-                const up = a[b - 1][c]
-                if (!up || up === 0 || up === cell) {
-                    return true
-                }
-            }
-        }
-    }
-    return false
-}
-
-function canMoveDown(a) {
-    for (let b = 0; b < 4; b++) {
-        for (let c = 0; c < 4; c++) {
-            const cell = a[b][c]
-            if (cell && cell !== 0 && b != 3) {
-                const down = a[b + 1][c]
-                if (!down || down === 0 || down === cell) {
-                    return true
-                }
-            }
-        }
-    }
-    return false
-}
-
-function noBlockHorizontal(a, b, c, d) {
-    for (b += 1; b < c; b++) {
-        if (d[a][b] && d[a][b] !== 0) return false
-    }
-    return true
-}
-
-function noBlockVertical(a, b, c, d) {
-    for (b += 1; b < c; b++) {
-        if (d[b][a] && d[b][a] !== 0) return false
-    }
-    return true
-}
-</script>
-
-<style>
-.container {
+  </template>
+  
+  <script>
+  import prompt from "@system.prompt"
+  import folme from '@system.folme'
+  import file from '@system.file'
+  
+  var sc = 0,
+      ls = 0,
+      lhs = 0,
+      board = Array(4),
+      added = Array(4),
+      over = 0,
+      lm = Array(4),
+      that,
+      maxTile = 0,
+      maxTileHistory = 0
+  
+  // 初始化数组
+  for (let i = 0; i < 4; i++) {
+      lm[i] = new Array(4).fill(0)
+      board[i] = new Array(4).fill(0)
+      added[i] = new Array(4).fill(0)
+  }
+  
+  // 定义文件路径
+  const GAME_DATA_FILE = 'internal://files/2048/game_data.json'
+  
+  export default {
+      public: {
+          blocks: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"],
+          md: [],
+          hsc: 0,
+          sco: sc,
+          maxTile: 0,
+          maxTileHistory: 0,
+          bgc: [],
+          ise: [],
+          ch: 0,
+          dark: false,
+          menuFlag: false,
+          ani: true,
+          scoreMode: true
+      },
+  
+      onInit() {
+          that = this
+          // 初始化颜色
+          let tempc =
+              "rgba(0,0,0,0) #EFE5DA #F0E0C9 #fcb477 #ff9c61 #ff865d #ff6a38 #ebcf71 #ebcc5f #ebc94f #ebc53f #ebc22c #F2B6B6 #E8ED51 #FFE3FB #E8FF8C #FFDEC9".split(
+                  " "
+              )
+          tempc.forEach((a, index) => {
+              this.bgc[2 ** index] = a
+          })
+          this.bgc[""] = "rgba(0, 0, 0, 0)"
+  
+          // 检查并创建目录
+          file.access({
+              uri: 'internal://files/2048',
+              success: () => {
+                  // 目录存在，加载游戏数据
+                  file.readText({
+                      uri: GAME_DATA_FILE,
+                      success: (res) => {
+                          if (res.text) {
+                              let o = JSON.parse(res.text)
+                              board = o.map || board
+                              this.hsc = o.hs || 0
+                              this.sco = o.sc || 0
+                              this.ch = o.ch || 0
+                              this.dark = o.dark || false
+                              this.ani = o.ani !== undefined ? o.ani : true
+                              this.scoreMode = o.scoreMode !== undefined ? o.scoreMode : true
+                              this.maxTile = o.maxTile || 0
+                              this.maxTileHistory = o.maxTileHistory || 0
+                              lm = o.lm || lm
+                              ls = o.ls || 0
+                              lhs = o.lhs || 0
+                              rm0(board)
+                          } else {
+                              this.new_game()
+                          }
+                      },
+                      fail: () => {
+                          this.new_game()
+                      }
+                  })
+              },
+              fail: () => {
+                  // 目录不存在，创建目录
+                  file.mkdir({
+                      uri: 'internal://files/2048',
+                      success: () => {
+                          file.readText({
+                              uri: GAME_DATA_FILE,
+                              success: (res) => {
+                                  if (res.text) {
+                                      let o = JSON.parse(res.text)
+                                      board = o.map || board
+                                      this.hsc = o.hs || 0
+                                      this.sco = o.sc || 0
+                                      this.ch = o.ch || 0
+                                      this.dark = o.dark || false
+                                      this.ani = o.ani !== undefined ? o.ani : true
+                                      this.scoreMode = o.scoreMode !== undefined ? o.scoreMode : true
+                                      this.maxTile = o.maxTile || 0
+                                      this.maxTileHistory = o.maxTileHistory || 0
+                                      lm = o.lm || lm
+                                      ls = o.ls || 0
+                                      lhs = o.lhs || 0
+                                      rm0(board)
+                                  } else {
+                                      this.new_game()
+                                  }
+                              },
+                              fail: () => {
+                                  this.new_game()
+                              }
+                          })
+                      },
+                      fail: () => {
+                          this.new_game()
+                      }
+                  })
+              }
+          })
+          clear(added)
+      },
+  
+      changeScoreMode() {
+          this.scoreMode = !this.scoreMode
+          this.save()
+      },
+  
+      chcb() {
+          if (this.ch == 1 && lm && lm[0]) {
+              this.hsc = lhs || 0
+              this.sco = ls || 0
+  
+              // 恢复游戏状态
+              for (let i = 0; i < 4; i++) {
+                  for (let j = 0; j < 4; j++) {
+                      board[i][j] = lm[i][j] || 0
+                  }
+              }
+  
+              rm0(board)
+              over = 0
+              this.updateMaxTile()
+              this.save()
+              this.ch = 0
+          } else {
+              prompt.showToast({
+                  message: "不，不可以再撤啦",
+                  duration: 500
+              })
+          }
+      },
+  
+      new_game() {
+          backup()
+          over = 0
+          clear(board)
+          
+          // 生成两个初始方块（确保位置不同）
+          let pos1 = Math.floor(Math.random() * 16)
+          let pos2
+          do {
+              pos2 = Math.floor(Math.random() * 16)
+          } while (pos2 === pos1)
+          
+          let val1 = Math.random() > 0.5 ? 2 : 4
+          let val2 = Math.random() > 0.5 ? 2 : 4
+          
+          board[Math.floor(pos1 / 4)][pos1 % 4] = val1
+          board[Math.floor(pos2 / 4)][pos2 % 4] = val2
+          
+          this.sco = 0
+          this.maxTile = Math.max(val1, val2)
+          this.hsc = Math.max(this.hsc || 0, this.sco)
+          rm0(board)
+          this.save()
+      },
+  
+      move(eve) {
+          if (this.menuFlag) {
+              if (eve.direction == "right") this.exit('e')
+              return
+          }
+  
+          const direction = eve.direction.toLowerCase()
+          if (["up", "down", "left", "right"].includes(direction)) {
+              backup()
+              let oldMaxTile = this.maxTile // 保存移动前的最大方块值
+              let moved = mo(direction)
+              
+              if (moved) {
+                  // 如果移动后最大方块值变小了，恢复原来的值
+                  if (this.maxTile < oldMaxTile) {
+                      this.maxTile = oldMaxTile
+                  }
+                  
+                  if (over) {
+                      prompt.showToast({
+                          message: "Gameover!",
+                          duration: 2000
+                      })
+                  }
+                  
+                  if (this.sco > this.hsc) {
+                      this.hsc = this.sco
+                  }
+                  this.updateMaxTile()
+                  this.save()
+              }
+          }
+      },
+  
+      updateMaxTile() {
+          let currentMax = 0
+          for (let i = 0; i < 4; i++) {
+              for (let j = 0; j < 4; j++) {
+                  if (board[i][j] > currentMax) {
+                      currentMax = board[i][j]
+                  }
+              }
+          }
+          this.maxTile = currentMax || 2
+          if (currentMax > this.maxTileHistory) {
+              this.maxTileHistory = currentMax
+          }
+      },
+  
+      save() {
+          let o = {
+              map: board,
+              hs: this.hsc || 0,
+              sc: this.sco || 0,
+              dark: this.dark,
+              ani: this.ani,
+              ch: this.ch,
+              lm: lm || board,
+              ls: ls || this.sco,
+              lhs: lhs || this.hsc,
+              scoreMode: this.scoreMode,
+              maxTile: this.maxTile || 2,
+              maxTileHistory: this.maxTileHistory || 0
+          }
+          
+          file.writeText({
+              uri: GAME_DATA_FILE,
+              text: JSON.stringify(o),
+              success: () => console.log('游戏数据保存成功'),
+              fail: (err, code) => console.log(`保存失败: ${code}`)
+          })
+      },
+  
+      exit(a) {
+          if (a.direction == "right" || a == "e") {
+              if (this.menuFlag) {
+                  this.menuFlag = false
+              } else {
+                  this.$app.exit()
+              }
+          }
+      },
+  
+      openMenu() {
+          this.menuFlag = true
+      },
+  
+      changeMode() {
+          this.dark = !this.dark
+          this.save()
+      },
+  
+      changeAni() {
+          this.ani = !this.ani
+          this.save()
+      },
+  
+      onBackPress() {
+          this.exit('e')
+          return true
+      }
+  }
+  
+  // 辅助函数
+  function backup() {
+      if (!lm || !lm[0]) {
+          lm = Array(4)
+          for (let i = 0; i < 4; i++) {
+              lm[i] = new Array(4).fill(0)
+          }
+      }
+      
+      for (let i = 0; i < 4; i++) {
+          for (let j = 0; j < 4; j++) {
+              lm[i][j] = board[i][j] || 0
+          }
+      }
+      ls = that.sco || 0
+      lhs = that.hsc || 0
+      that.ch = 1
+  }
+  
+  function rm0(sm) {
+      let a = 0
+      for (let i = 0; i < 4; i++) {
+          for (var b = 0; 4 > b; b++) {
+              if (!sm[i][b] || sm[i][b] === 0) {
+                  that.md[a] = ""
+                  that.ise[a] = "#00000000"
+              } else {
+                  that.ise[a] = "#ffffff20"
+                  that.md[a] = sm[i][b]
+              }
+              a++
+          }
+      }
+      that.updateMaxTile()
+  }
+  
+  function clear(m) {
+      for (let i = 0; i < 4; i++) {
+          m[i].fill(0)
+      }
+  }
+  
+  function newblock() {
+      let newValue = Math.random() > 0.5 ? 4 : 2
+      
+      for (var a = 3, b = Math.floor(Math.random() * 4), c = Math.floor(Math.random() * 4); a > 0; a--) {
+          if (!board[b][c] || board[b][c] === 0) {
+              board[b][c] = newValue
+              // 更新最大方块值
+              if (newValue > that.maxTile) {
+                  that.maxTile = newValue
+              }
+              return
+          }
+          b = Math.floor(Math.random() * 4)
+          c = Math.floor(Math.random() * 4)
+      }
+      checkGameOver()
+  }
+  
+  function mo(dir) {
+      if (!canMoveLeft(board) && !canMoveRight(board) && !canMoveUp(board) && !canMoveDown(board)) {
+          over = 1
+          rm0(board)
+          return false
+      }
+  
+      let moved = false
+  
+      switch (dir) {
+          case "left":
+              moved = moveleft()
+              break
+          case "right":
+              moved = moveright()
+              break
+          case "up":
+              moved = moveup()
+              break
+          case "down":
+              moved = movedown()
+              break
+      }
+  
+      if (moved) {
+          clear(added)
+          if (that.ani) {
+              setTimeout(() => {
+                  clearani()
+              }, 120)
+              setTimeout(() => {
+                  newblock()
+                  rm0(board)
+              }, 110)
+          } else {
+              newblock()
+              rm0(board)
+          }
+          checkGameOver()
+      }
+  
+      return moved
+  }
+  
+  function moveleft() {
+      let moved = false
+      for (let a = 0; a < 4; a++) {
+          for (let b = 1; b < 4; b++) {
+              const current = board[a][b]
+              if (current && current !== 0) {
+                  for (let c = 0; c < b; c++) {
+                      const target = board[a][c]
+  
+                      if ((!target || target === 0) && noBlockHorizontal(a, c, b, board)) {
+                          board[a][c] = current
+                          board[a][b] = 0
+                          if (that.ani) fromTo(a * 4 + b, a * 4 + c)
+                          moved = true
+                          break
+                      } else if (
+                          target &&
+                          target === current &&
+                          noBlockHorizontal(a, c, b, board) &&
+                          0 == added[a][c]
+                      ) {
+                          const newValue = target * 2
+                          board[a][c] = newValue
+                          that.sco += newValue
+                          board[a][b] = 0
+                          added[a][c] = 1
+                          if (that.ani) fromTo(a * 4 + b, a * 4 + c)
+                          moved = true
+                          break
+                      }
+                  }
+              }
+          }
+      }
+      return moved
+  }
+  
+  function moveright() {
+      let moved = false
+      for (let a = 0; a < 4; a++) {
+          for (let b = 2; b >= 0; b--) {
+              const current = board[a][b]
+              if (current && current !== 0) {
+                  for (let c = 3; c > b; c--) {
+                      const target = board[a][c]
+  
+                      if ((!target || target === 0) && noBlockHorizontal(a, b, c, board)) {
+                          board[a][c] = current
+                          board[a][b] = 0
+                          if (that.ani) fromTo(a * 4 + b, a * 4 + c)
+                          moved = true
+                          break
+                      } else if (
+                          target &&
+                          target === current &&
+                          noBlockHorizontal(a, b, c, board) &&
+                          0 == added[a][c]
+                      ) {
+                          const newValue = target * 2
+                          board[a][c] = newValue
+                          that.sco += newValue
+                          board[a][b] = 0
+                          added[a][c] = 1
+                          if (that.ani) fromTo(a * 4 + b, a * 4 + c)
+                          moved = true
+                          break
+                      }
+                  }
+              }
+          }
+      }
+      return moved
+  }
+  
+  function moveup() {
+      let moved = false
+      for (let a = 0; a < 4; a++) {
+          for (let b = 1; b < 4; b++) {
+              const current = board[b][a]
+              if (current && current !== 0) {
+                  for (let c = 0; c < b; c++) {
+                      const target = board[c][a]
+  
+                      if ((!target || target === 0) && noBlockVertical(a, c, b, board)) {
+                          board[c][a] = current
+                          board[b][a] = 0
+                          if (that.ani) fromTo(b * 4 + a, c * 4 + a)
+                          moved = true
+                          break
+                      } else if (
+                          target &&
+                          target === current &&
+                          noBlockVertical(a, c, b, board) &&
+                          0 == added[c][a]
+                      ) {
+                          const newValue = target * 2
+                          board[c][a] = newValue
+                          that.sco += newValue
+                          board[b][a] = 0
+                          added[c][a] = 1
+                          if (that.ani) fromTo(b * 4 + a, c * 4 + a)
+                          moved = true
+                          break
+                      }
+                  }
+              }
+          }
+      }
+      return moved
+  }
+  
+  function movedown() {
+      let moved = false
+      for (let a = 0; a < 4; a++) {
+          for (let b = 2; b >= 0; b--) {
+              const current = board[b][a]
+              if (current && current !== 0) {
+                  for (let c = 3; c > b; c--) {
+                      const target = board[c][a]
+  
+                      if ((!target || target === 0) && noBlockVertical(a, b, c, board)) {
+                          board[c][a] = current
+                          board[b][a] = 0
+                          if (that.ani) fromTo(b * 4 + a, c * 4 + a)
+                          moved = true
+                          break
+                      } else if (
+                          target &&
+                          target === current &&
+                          noBlockVertical(a, b, c, board) &&
+                          0 == added[c][a]
+                      ) {
+                          const newValue = target * 2
+                          board[c][a] = newValue
+                          that.sco += newValue
+                          board[b][a] = 0
+                          added[c][a] = 1
+                          if (that.ani) fromTo(b * 4 + a, c * 4 + a)
+                          moved = true
+                          break
+                      }
+                  }
+              }
+          }
+      }
+      return moved
+  }
+  
+  function fromTo(id1, id2) {
+      id1 = id1.toString()
+      id2 = id2.toString()
+      
+      that.$element(id1).getBoundingClientRect({
+          success: (data1) => {
+              that.$element(id2).getBoundingClientRect({
+                  success: (data2) => {
+                      const dx = data2.left - data1.left
+                      const dy = data2.top - data1.top
+                      
+                      folme.fromTo({
+                          id: id1,
+                          fromState: {translateX: "0px", translateY: "0px"},
+                          toState: {translateX: dx + "px", translateY: dy + "px"},
+                          config: {duration: 0.1}
+                      })
+                  }
+              })
+          }
+      })
+  }
+  
+  function clearani() {
+      for (let i = 0; i < 16; i++) {
+          let id = i.toString()
+          folme.cancel({id: id})
+          folme.setTo({
+              id: id,
+              toState: {translateX: "0px", translateY: "0px"}
+          })
+      }
+  }
+  
+  function checkGameOver() {
+      for (let i = 0; i < 4; i++) {
+          for (let j = 0; j < 4; j++) {
+              if (!board[i][j] || board[i][j] === 0) {
+                  over = 0
+                  return
+              }
+          }
+      }
+  
+      for (let i = 0; i < 4; i++) {
+          for (let j = 0; j < 4; j++) {
+              const current = board[i][j]
+              if (!current) continue
+  
+              if (j < 3 && board[i][j + 1] && board[i][j + 1] === current) {
+                  over = 0
+                  return
+              }
+  
+              if (i < 3 && board[i + 1][j] && board[i + 1][j] === current) {
+                  over = 0
+                  return
+              }
+          }
+      }
+  
+      over = 1
+  }
+  
+  function canMoveLeft(a) {
+      for (let b = 0; b < 4; b++) {
+          for (let c = 0; c < 4; c++) {
+              const cell = a[b][c]
+              if (cell && cell !== 0 && c != 0) {
+                  const left = a[b][c - 1]
+                  if (!left || left === 0 || left === cell) {
+                      return true
+                  }
+              }
+          }
+      }
+      return false
+  }
+  
+  function canMoveRight(a) {
+      for (let b = 0; b < 4; b++) {
+          for (let c = 0; c < 4; c++) {
+              const cell = a[b][c]
+              if (cell && cell !== 0 && c != 3) {
+                  const right = a[b][c + 1]
+                  if (!right || right === 0 || right === cell) {
+                      return true
+                  }
+              }
+          }
+      }
+      return false
+  }
+  
+  function canMoveUp(a) {
+      for (let b = 0; b < 4; b++) {
+          for (let c = 0; c < 4; c++) {
+              const cell = a[b][c]
+              if (cell && cell !== 0 && b != 0) {
+                  const up = a[b - 1][c]
+                  if (!up || up === 0 || up === cell) {
+                      return true
+                  }
+              }
+          }
+      }
+      return false
+  }
+  
+  function canMoveDown(a) {
+      for (let b = 0; b < 4; b++) {
+          for (let c = 0; c < 4; c++) {
+              const cell = a[b][c]
+              if (cell && cell !== 0 && b != 3) {
+                  const down = a[b + 1][c]
+                  if (!down || down === 0 || down === cell) {
+                      return true
+                  }
+              }
+          }
+      }
+      return false
+  }
+  
+  function noBlockHorizontal(a, b, c, d) {
+      for (b += 1; b < c; b++) {
+          if (d[a][b] && d[a][b] !== 0) return false
+      }
+      return true
+  }
+  
+  function noBlockVertical(a, b, c, d) {
+      for (b += 1; b < c; b++) {
+          if (d[b][a] && d[b][a] !== 0) return false
+      }
+      return true
+  }
+  </script>
+  
+  <style>
+  .container {
+    position: relative;
+    width: 192px;
+    height: 490px;
+  }
+  
+  .bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .bg-img {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .btn-reset {
+    position: absolute;
+    left: 5px;
+    top: 387px;
+    width: 92px;
+    height: 64px;
+  }
+  
+  .btn-undo {
+    position: absolute;
+    left: 115px;
+    top: 387px;
+    width: 92px;
+    height: 64px;
+  }
+  
+  .btn-info {
+    position: absolute;
+    left: 65px;
+    top: 451px;
+    width: 83px;
+    height: 62px;
+  }
+  
+  .btn-back {
+    position: absolute;
+    left: 55px;
+    top: 7px;
+    width: 102px;
+    height: 72px;
+  }
+  
+  .game-board {
+  position: absolute;
+  left: 4px;
+  top: 170px;
+  width: 206px;
+  height: 206px;
+  padding-top: 4px;
+  padding-left: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  }
+  
+  .square {
+  width: 44px;
+  height: 44px;
+  margin-top: 5px;
+  margin-left: 4px;
+  border-radius: 13px;
+  font-size: 15px;
+  color: #59503f;
+  font-weight: bold;
+  text-align: center;
   position: relative;
-  width: 192px;
-  height: 490px;
-}
-
-.bg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.bg-img {
-  width: 100%;
-  height: 100%;
-}
-
-.btn-reset {
-  position: absolute;
-  left: 5px;
-  top: 387px;
-  width: 92px;
-  height: 64px;
-}
-
-.btn-undo {
-  position: absolute;
-  left: 115px;
-  top: 387px;
-  width: 92px;
-  height: 64px;
-}
-
-.btn-info {
-  position: absolute;
-  left: 65px;
-  top: 451px;
-  width: 83px;
-  height: 62px;
-}
-
-.btn-back {
-  position: absolute;
-  left: 55px;
-  top: 7px;
-  width: 102px;
-  height: 72px;
-}
-
-.game-board {
-position: absolute;
-left: 4px;
-top: 170px;
-width: 206px;
-height: 206px;
-padding-top: 4px;
-padding-left: 4px;
-display: flex;
-flex-wrap: wrap;
-}
-
-.square {
-width: 44px;
-height: 44px;
-margin-top: 5px;
-margin-left: 4px;
-border-radius: 13px;
-font-size: 15px;
-color: #59503f;
-font-weight: bold;
-text-align: center;
-position: relative;
-}
-
-.score {
-  position: absolute;
-  left: 0;
-  top: 84px;
-  width: 100%;
-  font-size: 28px;
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
-}
-
-.current-score {
-  position: absolute;
-  left: 0;
-  top: 122px;
-  width: 100%;
-  font-size: 28px;
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
-}
-
-.menu-overlay {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0);
-}
-
-.menu-content {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.mode-btn {
-  position: absolute;
-  left: 56px;
-  top: 636px;
-  width: 102px;
-  height: 72px;
-}
-
-.ani-btn {
-  position: absolute;
-  left: 55px;
-  top: 768px;
-  width: 102px;
-  height: 72px;
-}
-
-.score-mode-btn {
-  position: absolute;
-  left: 55px;
-  top: 951px;
-  width: 102px;
-  height: 72px;
-}
-</style>
+  }
+  
+  .score {
+    position: absolute;
+    left: 0;
+    top: 84px;
+    width: 100%;
+    font-size: 28px;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+  }
+  
+  .current-score {
+    position: absolute;
+    left: 0;
+    top: 122px;
+    width: 100%;
+    font-size: 28px;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+  }
+  
+  .menu-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+  }
+  
+  .menu-content {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .mode-btn {
+    position: absolute;
+    left: 56px;
+    top: 636px;
+    width: 102px;
+    height: 72px;
+  }
+  
+  .ani-btn {
+    position: absolute;
+    left: 55px;
+    top: 768px;
+    width: 102px;
+    height: 72px;
+  }
+  
+  .score-mode-btn {
+    position: absolute;
+    left: 55px;
+    top: 951px;
+    width: 102px;
+    height: 72px;
+  }
+  </style>
