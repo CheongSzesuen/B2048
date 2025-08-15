@@ -424,31 +424,40 @@
   }
   
   function newblock() {
+      let emptyCells = []
+      
+      // 收集所有空格子
+      for (let i = 0; i < 4; i++) {
+          for (let j = 0; j < 4; j++) {
+              if (!board[i][j]) {
+                  emptyCells.push({i, j})
+              }
+          }
+      }
+      
+      if (emptyCells.length === 0) {
+          checkGameOver()
+          return
+      }
+      
+      // 随机选择一个空格子
+      let randomIndex = Math.floor(Math.random() * emptyCells.length)
+      let cell = emptyCells[randomIndex]
       let newValue = Math.random() > 0.5 ? 4 : 2
       
-      for (var a = 3, b = Math.floor(Math.random() * 4), c = Math.floor(Math.random() * 4); a > 0; a--) {
-          if (!board[b][c] || board[b][c] === 0) {
-              board[b][c] = newValue
-              // 更新最大方块值
-              if (newValue > that.maxTile) {
-                  that.maxTile = newValue
-              }
-              return
-          }
-          b = Math.floor(Math.random() * 4)
-          c = Math.floor(Math.random() * 4)
+      board[cell.i][cell.j] = newValue
+      
+      // 更新最大方块值
+      if (newValue > that.maxTile) {
+          that.maxTile = newValue
       }
-      checkGameOver()
   }
   
   function mo(dir) {
-      if (!canMoveLeft(board) && !canMoveRight(board) && !canMoveUp(board) && !canMoveDown(board)) {
-          over = 1
-          rm0(board)
-          return false
-      }
+      if (over) return false; // 游戏已结束时不处理移动
   
       let moved = false
+      let oldBoard = JSON.parse(JSON.stringify(board)) // 保存移动前的状态
   
       switch (dir) {
           case "left":
@@ -465,21 +474,37 @@
               break
       }
   
+      // 检查棋盘是否真的发生了变化
       if (moved) {
-          clear(added)
-          if (that.ani) {
-              setTimeout(() => {
-                  clearani()
-              }, 120)
-              setTimeout(() => {
+          let boardChanged = false
+          for (let i = 0; i < 4; i++) {
+              for (let j = 0; j < 4; j++) {
+                  if (oldBoard[i][j] !== board[i][j]) {
+                      boardChanged = true
+                      break
+                  }
+              }
+              if (boardChanged) break
+          }
+  
+          if (!boardChanged) {
+              moved = false
+          } else {
+              clear(added)
+              if (that.ani) {
+                  setTimeout(() => {
+                      clearani()
+                  }, 120)
+                  setTimeout(() => {
+                      newblock()
+                      rm0(board)
+                  }, 110)
+              } else {
                   newblock()
                   rm0(board)
-              }, 110)
-          } else {
-              newblock()
-              rm0(board)
+              }
+              checkGameOver()
           }
-          checkGameOver()
       }
   
       return moved
@@ -668,33 +693,42 @@
   }
   
   function checkGameOver() {
+      // 检查是否有空格子
       for (let i = 0; i < 4; i++) {
           for (let j = 0; j < 4; j++) {
-              if (!board[i][j] || board[i][j] === 0) {
+              if (!board[i][j]) {
                   over = 0
                   return
               }
           }
       }
   
+      // 检查是否有可合并的相邻方块
       for (let i = 0; i < 4; i++) {
           for (let j = 0; j < 4; j++) {
               const current = board[i][j]
               if (!current) continue
   
-              if (j < 3 && board[i][j + 1] && board[i][j + 1] === current) {
+              // 检查右侧
+              if (j < 3 && board[i][j + 1] === current) {
                   over = 0
                   return
               }
   
-              if (i < 3 && board[i + 1][j] && board[i + 1][j] === current) {
+              // 检查下方
+              if (i < 3 && board[i + 1][j] === current) {
                   over = 0
                   return
               }
           }
       }
   
+      // 如果没有空格子且没有可合并的方块，游戏结束
       over = 1
+      prompt.showToast({
+          message: "Game Over!",
+          duration: 2000
+      })
   }
   
   function canMoveLeft(a) {
